@@ -3,7 +3,7 @@ import { LanguageToggle } from '@/components/LanguageToggle';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ChevronLeft, TrendingUp, TrendingDown, Minus, MapPin, Star, Lightbulb, ChevronRight, Settings, Share2 } from 'lucide-react';
+import { ChevronLeft, TrendingUp, TrendingDown, Minus, MapPin, Star, Lightbulb, ChevronRight, Settings, Share2, BarChart3, Bell } from 'lucide-react';
 import { Crop, District, getMandiPricesForCrop, getDecisionInsight, MandiPrice, Mandi } from '@/data/mockData';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -15,6 +15,8 @@ interface MarketComparisonScreenProps {
   onViewTrend: (mandiPrice: MandiPrice & { mandi: Mandi }) => void;
   onBack: () => void;
   onSettings: () => void;
+  onViewAnalytics?: () => void;
+  onViewAlerts?: () => void;
 }
 
 export function MarketComparisonScreen({ 
@@ -23,7 +25,9 @@ export function MarketComparisonScreen({
   quantity,
   onViewTrend, 
   onBack,
-  onSettings 
+  onSettings,
+  onViewAnalytics,
+  onViewAlerts
 }: MarketComparisonScreenProps) {
   const { t, language } = useLanguage();
   const mandiPrices = getMandiPricesForCrop(crop.id);
@@ -137,6 +141,30 @@ export function MarketComparisonScreen({
             </div>
           </div>
         </Card>
+
+        {/* Quick Actions */}
+        <div className="flex gap-2">
+          {onViewAnalytics && (
+            <Button
+              variant="outline"
+              className="flex-1"
+              onClick={onViewAnalytics}
+            >
+              <BarChart3 className="w-4 h-4 mr-2" />
+              {language === 'hi' ? 'विश्लेषण' : 'Analytics'}
+            </Button>
+          )}
+          {onViewAlerts && (
+            <Button
+              variant="outline"
+              className="flex-1"
+              onClick={onViewAlerts}
+            >
+              <Bell className="w-4 h-4 mr-2" />
+              {language === 'hi' ? 'अलर्ट' : 'Alerts'}
+            </Button>
+          )}
+        </div>
 
         {/* Nearby Mandis Header */}
         <div className="flex items-center justify-between">
