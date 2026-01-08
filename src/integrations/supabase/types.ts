@@ -14,7 +14,69 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      price_alerts: {
+        Row: {
+          alert_type: string
+          created_at: string
+          crop_id: string
+          device_id: string
+          id: string
+          is_active: boolean
+          target_price: number
+          triggered_at: string | null
+        }
+        Insert: {
+          alert_type: string
+          created_at?: string
+          crop_id: string
+          device_id: string
+          id?: string
+          is_active?: boolean
+          target_price: number
+          triggered_at?: string | null
+        }
+        Update: {
+          alert_type?: string
+          created_at?: string
+          crop_id?: string
+          device_id?: string
+          id?: string
+          is_active?: boolean
+          target_price?: number
+          triggered_at?: string | null
+        }
+        Relationships: []
+      }
+      price_history: {
+        Row: {
+          created_at: string
+          crop_id: string
+          id: string
+          mandi_id: string
+          price: number
+          recorded_at: string
+          source: string | null
+        }
+        Insert: {
+          created_at?: string
+          crop_id: string
+          id?: string
+          mandi_id: string
+          price: number
+          recorded_at?: string
+          source?: string | null
+        }
+        Update: {
+          created_at?: string
+          crop_id?: string
+          id?: string
+          mandi_id?: string
+          price?: number
+          recorded_at?: string
+          source?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

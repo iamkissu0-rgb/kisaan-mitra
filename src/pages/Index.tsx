@@ -5,10 +5,12 @@ import { LocationScreen } from '@/components/screens/LocationScreen';
 import { CropSelectionScreen } from '@/components/screens/CropSelectionScreen';
 import { MarketComparisonScreen } from '@/components/screens/MarketComparisonScreen';
 import { PriceTrendScreen } from '@/components/screens/PriceTrendScreen';
+import { PriceAnalyticsScreen } from '@/components/screens/PriceAnalyticsScreen';
+import { PriceAlertsScreen } from '@/components/screens/PriceAlertsScreen';
 import { SettingsScreen } from '@/components/screens/SettingsScreen';
 import { Crop, District, MandiPrice, Mandi } from '@/data/mockData';
 
-type Screen = 'welcome' | 'location' | 'crop' | 'market' | 'trend' | 'settings';
+type Screen = 'welcome' | 'location' | 'crop' | 'market' | 'trend' | 'analytics' | 'alerts' | 'settings';
 
 function MandiMitraApp() {
   const [currentScreen, setCurrentScreen] = useState<Screen>('welcome');
@@ -16,6 +18,7 @@ function MandiMitraApp() {
   const [selectedCrop, setSelectedCrop] = useState<Crop | null>(null);
   const [selectedQuantity, setSelectedQuantity] = useState<number | undefined>();
   const [selectedMandiPrice, setSelectedMandiPrice] = useState<(MandiPrice & { mandi: Mandi }) | null>(null);
+  const [previousScreen, setPreviousScreen] = useState<Screen>('market');
 
   const handleLocationConfirm = (district: District) => {
     setSelectedDistrict(district);
@@ -31,6 +34,16 @@ function MandiMitraApp() {
   const handleViewTrend = (mandiPrice: MandiPrice & { mandi: Mandi }) => {
     setSelectedMandiPrice(mandiPrice);
     setCurrentScreen('trend');
+  };
+
+  const handleViewAnalytics = () => {
+    setPreviousScreen(currentScreen);
+    setCurrentScreen('analytics');
+  };
+
+  const handleViewAlerts = () => {
+    setPreviousScreen(currentScreen);
+    setCurrentScreen('alerts');
   };
 
   return (
@@ -62,6 +75,8 @@ function MandiMitraApp() {
           onViewTrend={handleViewTrend}
           onBack={() => setCurrentScreen('crop')}
           onSettings={() => setCurrentScreen('settings')}
+          onViewAnalytics={handleViewAnalytics}
+          onViewAlerts={handleViewAlerts}
         />
       )}
       
@@ -72,9 +87,21 @@ function MandiMitraApp() {
           onBack={() => setCurrentScreen('market')}
         />
       )}
+
+      {currentScreen === 'analytics' && selectedCrop && (
+        <PriceAnalyticsScreen
+          crop={selectedCrop}
+          onBack={() => setCurrentScreen(previousScreen)}
+          onSettings={() => setCurrentScreen('settings')}
+        />
+      )}
+
+      {currentScreen === 'alerts' && (
+        <PriceAlertsScreen onBack={() => setCurrentScreen(previousScreen)} />
+      )}
       
       {currentScreen === 'settings' && (
-        <SettingsScreen onBack={() => setCurrentScreen('market')} />
+        <SettingsScreen onBack={() => setCurrentScreen(previousScreen)} />
       )}
     </div>
   );
