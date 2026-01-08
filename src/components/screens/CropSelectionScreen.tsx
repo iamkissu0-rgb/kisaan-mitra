@@ -1,12 +1,14 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { LanguageToggle } from '@/components/LanguageToggle';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
-import { ChevronLeft, Check } from 'lucide-react';
+import { ChevronLeft, Check, Mic, MicOff } from 'lucide-react';
 import { crops, Crop, District } from '@/data/mockData';
 import { cn } from '@/lib/utils';
+import { useVoiceInput } from '@/hooks/useVoiceInput';
+import { toast } from 'sonner';
 
 interface CropSelectionScreenProps {
   district: District;
@@ -14,10 +16,99 @@ interface CropSelectionScreenProps {
   onBack: () => void;
 }
 
+// Mapping of Hindi/English crop names to crop IDs for voice matching
+const cropNameMappings: Record<string, string> = {
+  // Hindi names
+  'गेहूं': 'wheat',
+  'गेहूँ': 'wheat',
+  'सोयाबीन': 'soybean',
+  'चना': 'chana',
+  'धान': 'rice',
+  'चावल': 'rice',
+  'मक्का': 'maize',
+  'टमाटर': 'tomato',
+  'प्याज': 'onion',
+  'आलू': 'potato',
+  'लहसुन': 'garlic',
+  'मूंग': 'moong',
+  'मसूर': 'masoor',
+  // English names
+  'wheat': 'wheat',
+  'soybean': 'soybean',
+  'soya': 'soybean',
+  'chana': 'chana',
+  'chickpea': 'chana',
+  'rice': 'rice',
+  'paddy': 'rice',
+  'maize': 'maize',
+  'corn': 'maize',
+  'tomato': 'tomato',
+  'onion': 'onion',
+  'potato': 'potato',
+  'garlic': 'garlic',
+  'moong': 'moong',
+  'mung': 'moong',
+  'masoor': 'masoor',
+  'lentil': 'masoor',
+};
+
 export function CropSelectionScreen({ district, onSelectCrop, onBack }: CropSelectionScreenProps) {
   const { t, language } = useLanguage();
   const [selectedCrop, setSelectedCrop] = useState<Crop | null>(null);
   const [quantity, setQuantity] = useState<string>('');
+
+  const findCropFromVoice = (transcript: string) => {
+    const normalizedTranscript = transcript.toLowerCase().trim();
+    
+    // Check each mapping
+    for (const [name, cropId] of Object.entries(cropNameMappings)) {
+      if (normalizedTranscript.includes(name.toLowerCase())) {
+        const matchedCrop = crops.find(c => c.id === cropId);
+        if (matchedCrop) {
+          setSelectedCrop(matchedCrop);
+          toast.success(
+            language === 'hi' 
+              ? `${t(matchedCrop.nameKey)} चुना गया` 
+              : `Selected ${t(matchedCrop.nameKey)}`
+          );
+          return;
+        }
+      }
+    }
+    
+    // No match found
+    toast.error(
+      language === 'hi' 
+        ? 'फसल नहीं मिली, फिर से बोलें' 
+        : 'Crop not found, try again'
+    );
+  };
+
+  const { isListening, isSupported, startListening, stopListening } = useVoiceInput({
+    language: language === 'hi' ? 'hi-IN' : 'en-IN',
+    onResult: findCropFromVoice,
+    onError: (error) => {
+      console.error('Voice error:', error);
+      toast.error(
+        language === 'hi' 
+          ? 'आवाज़ समझ नहीं आई' 
+          : 'Could not understand speech'
+      );
+    },
+  });
+
+  const handleVoiceClick = () => {
+    if (isListening) {
+      stopListening();
+    } else {
+      startListening();
+      toast.info(
+        language === 'hi' 
+          ? 'बोलिए... "गेहूं", "सोयाबीन"...' 
+          : 'Speak... "Wheat", "Soybean"...'
+      );
+    }
+  };
 
   const handleContinue = () => {
     if (selectedCrop) {
@@ -42,6 +133,48 @@ export function CropSelectionScreen({ district, onSelectCrop, onBack }: CropSele
       </header>
 
       <main className="flex-1 p-4 pb-32 overflow-auto">
+        {/* Voice Input Button */}
+        {isSupported && (
+          <Card 
+            className={cn(
+              'mb-4 p-4 flex items-center justify-between cursor-pointer transition-all',
+              isListening && 'ring-2 ring-primary bg-primary/10'
+            )}
+            onClick={handleVoiceClick}
+          >
+            <div className="flex items-center gap-3">
+              <div className={cn(
+                'w-12 h-12 rounded-full flex items-center justify-center transition-all',
+                isListening ? 'bg-primary animate-pulse' : 'bg-primary/20'
+              )}>
+                {isListening ? (
+                  <MicOff className="w-6 h-6 text-primary-foreground" />
+                ) : (
+                  <Mic className="w-6 h-6 text-primary" />
+                )}
+              </div>
+              <div>
+                <p className="font-medium">
+                  {language === 'hi' ? 'बोलकर चुनें' : 'Select by voice'}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  {isListening 
+                    ? (language === 'hi' ? 'सुन रहे हैं...' : 'Listening...')
+                    : (language === 'hi' ? 'टैप करके बोलें' : 'Tap and speak')
+                  }
+                </p>
+              </div>
+            </div>
+            {isListening && (
+              <div className="flex gap-1">
+                <span className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                <span className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                <span className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+              </div>
+            )}
+          </Card>
+        )}
+
         {/* Crop Grid */}
         <div className="grid grid-cols-3 gap-3">
           {crops.map(crop => (
