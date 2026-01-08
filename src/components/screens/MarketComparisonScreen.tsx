@@ -3,7 +3,7 @@ import { LanguageToggle } from '@/components/LanguageToggle';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ChevronLeft, TrendingUp, TrendingDown, Minus, MapPin, Star, Lightbulb, ChevronRight, Settings, Share2, BarChart3, Bell } from 'lucide-react';
+import { ChevronLeft, TrendingUp, TrendingDown, Minus, MapPin, Star, Lightbulb, ChevronRight, Settings, Share2, BarChart3, Bell, Calendar } from 'lucide-react';
 import { Crop, District, getMandiPricesForCrop, getDecisionInsight, MandiPrice, Mandi } from '@/data/mockData';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -17,6 +17,7 @@ interface MarketComparisonScreenProps {
   onSettings: () => void;
   onViewAnalytics?: () => void;
   onViewAlerts?: () => void;
+  onViewCalendar?: () => void;
 }
 
 export function MarketComparisonScreen({ 
@@ -27,7 +28,8 @@ export function MarketComparisonScreen({
   onBack,
   onSettings,
   onViewAnalytics,
-  onViewAlerts
+  onViewAlerts,
+  onViewCalendar
 }: MarketComparisonScreenProps) {
   const { t, language } = useLanguage();
   const mandiPrices = getMandiPricesForCrop(crop.id);
@@ -162,6 +164,16 @@ export function MarketComparisonScreen({
             >
               <Bell className="w-4 h-4 mr-2" />
               {language === 'hi' ? 'अलर्ट' : 'Alerts'}
+            </Button>
+          )}
+          {onViewCalendar && (
+            <Button
+              variant="outline"
+              className="flex-1"
+              onClick={onViewCalendar}
+            >
+              <Calendar className="w-4 h-4 mr-2" />
+              {language === 'hi' ? 'कैलेंडर' : 'Calendar'}
             </Button>
           )}
         </div>

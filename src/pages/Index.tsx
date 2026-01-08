@@ -7,10 +7,11 @@ import { MarketComparisonScreen } from '@/components/screens/MarketComparisonScr
 import { PriceTrendScreen } from '@/components/screens/PriceTrendScreen';
 import { PriceAnalyticsScreen } from '@/components/screens/PriceAnalyticsScreen';
 import { PriceAlertsScreen } from '@/components/screens/PriceAlertsScreen';
+import { CropCalendarScreen } from '@/components/screens/CropCalendarScreen';
 import { SettingsScreen } from '@/components/screens/SettingsScreen';
 import { Crop, District, MandiPrice, Mandi } from '@/data/mockData';
 
-type Screen = 'welcome' | 'location' | 'crop' | 'market' | 'trend' | 'analytics' | 'alerts' | 'settings';
+type Screen = 'welcome' | 'location' | 'crop' | 'market' | 'trend' | 'analytics' | 'alerts' | 'calendar' | 'settings';
 
 function MandiMitraApp() {
   const [currentScreen, setCurrentScreen] = useState<Screen>('welcome');
@@ -46,10 +47,27 @@ function MandiMitraApp() {
     setCurrentScreen('alerts');
   };
 
+  const handleViewCalendar = () => {
+    setPreviousScreen(currentScreen);
+    setCurrentScreen('calendar');
+  };
+
+  const handleCalendarCropSelect = (crop: Crop) => {
+    setSelectedCrop(crop);
+    if (selectedDistrict) {
+      setCurrentScreen('market');
+    } else {
+      setCurrentScreen('location');
+    }
+  };
+
   return (
     <div className="max-w-md mx-auto min-h-screen bg-background">
       {currentScreen === 'welcome' && (
-        <WelcomeScreen onGetStarted={() => setCurrentScreen('location')} />
+        <WelcomeScreen 
+          onGetStarted={() => setCurrentScreen('location')} 
+          onViewCalendar={handleViewCalendar}
+        />
       )}
       
       {currentScreen === 'location' && (
@@ -77,6 +95,7 @@ function MandiMitraApp() {
           onSettings={() => setCurrentScreen('settings')}
           onViewAnalytics={handleViewAnalytics}
           onViewAlerts={handleViewAlerts}
+          onViewCalendar={handleViewCalendar}
         />
       )}
       
@@ -98,6 +117,13 @@ function MandiMitraApp() {
 
       {currentScreen === 'alerts' && (
         <PriceAlertsScreen onBack={() => setCurrentScreen(previousScreen)} />
+      )}
+
+      {currentScreen === 'calendar' && (
+        <CropCalendarScreen 
+          onBack={() => setCurrentScreen(previousScreen)}
+          onSelectCrop={handleCalendarCropSelect}
+        />
       )}
       
       {currentScreen === 'settings' && (
