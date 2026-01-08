@@ -2,14 +2,16 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { LanguageToggle } from '@/components/LanguageToggle';
 import { Button } from '@/components/ui/button';
 import { PriceWidget } from '@/components/PriceWidget';
+import { WeatherWidget } from '@/components/WeatherWidget';
 import { useLivePrices } from '@/hooks/useLivePrices';
-import { Sprout, MapPin, TrendingUp, Bell, Wifi, WifiOff } from 'lucide-react';
+import { Sprout, MapPin, TrendingUp, Bell, Wifi, WifiOff, Calendar } from 'lucide-react';
 
 interface WelcomeScreenProps {
   onGetStarted: () => void;
+  onViewCalendar?: () => void;
 }
 
-export function WelcomeScreen({ onGetStarted }: WelcomeScreenProps) {
+export function WelcomeScreen({ onGetStarted, onViewCalendar }: WelcomeScreenProps) {
   const { t, language } = useLanguage();
   const { prices, isLoading, lastUpdated, source, refetch } = useLivePrices();
 
@@ -47,9 +49,14 @@ export function WelcomeScreen({ onGetStarted }: WelcomeScreenProps) {
       </header>
 
       {/* Hero Section */}
-      <main className="flex-1 flex flex-col items-center px-6 pt-4">
+      <main className="flex-1 flex flex-col items-center px-6 pt-2 overflow-auto pb-4">
+        {/* Weather Widget (Compact) */}
+        <div className="w-full max-w-sm mb-4">
+          <WeatherWidget />
+        </div>
+
         {/* Price Widget - Home Screen Style */}
-        <div className="w-full max-w-sm mb-6">
+        <div className="w-full max-w-sm mb-4">
           <PriceWidget 
             prices={widgetPrices}
             isLoading={isLoading}
@@ -58,42 +65,50 @@ export function WelcomeScreen({ onGetStarted }: WelcomeScreenProps) {
           />
         </div>
 
-        {/* Illustration */}
-        <div className="mb-4">
-          <div className="w-32 h-32 bg-primary/20 rounded-full flex items-center justify-center mx-auto">
-            <div className="text-6xl">🌾</div>
-          </div>
-        </div>
-
         {/* Title */}
-        <h1 className="text-2xl font-bold leading-tight mb-2 text-foreground text-center">
+        <h1 className="text-xl font-bold leading-tight mb-2 text-foreground text-center">
           {t('welcomeTitle')}
         </h1>
 
         {/* Subtitle */}
-        <p className="text-muted-foreground mb-6 max-w-sm text-center text-sm">
+        <p className="text-muted-foreground mb-4 max-w-sm text-center text-sm">
           {t('welcomeSubtitle')}
         </p>
 
         {/* Features */}
-        <div className="grid grid-cols-3 gap-4 w-full max-w-sm">
-          <div className="flex flex-col items-center gap-2 p-3 rounded-xl bg-card">
-            <MapPin className="w-6 h-6 text-primary" />
-            <span className="text-xs text-muted-foreground">Location</span>
+        <div className="grid grid-cols-4 gap-3 w-full max-w-sm">
+          <div className="flex flex-col items-center gap-1 p-2 rounded-xl bg-card">
+            <MapPin className="w-5 h-5 text-primary" />
+            <span className="text-xs text-muted-foreground">
+              {language === 'hi' ? 'स्थान' : 'Location'}
+            </span>
           </div>
-          <div className="flex flex-col items-center gap-2 p-3 rounded-xl bg-card">
-            <TrendingUp className="w-6 h-6 text-primary" />
-            <span className="text-xs text-muted-foreground">Prices</span>
+          <div className="flex flex-col items-center gap-1 p-2 rounded-xl bg-card">
+            <TrendingUp className="w-5 h-5 text-primary" />
+            <span className="text-xs text-muted-foreground">
+              {language === 'hi' ? 'भाव' : 'Prices'}
+            </span>
           </div>
-          <div className="flex flex-col items-center gap-2 p-3 rounded-xl bg-card">
-            <Bell className="w-6 h-6 text-primary" />
-            <span className="text-xs text-muted-foreground">Alerts</span>
+          <div className="flex flex-col items-center gap-1 p-2 rounded-xl bg-card">
+            <Bell className="w-5 h-5 text-primary" />
+            <span className="text-xs text-muted-foreground">
+              {language === 'hi' ? 'अलर्ट' : 'Alerts'}
+            </span>
           </div>
+          <button 
+            onClick={onViewCalendar}
+            className="flex flex-col items-center gap-1 p-2 rounded-xl bg-card hover:bg-primary/10 transition-colors"
+          >
+            <Calendar className="w-5 h-5 text-primary" />
+            <span className="text-xs text-muted-foreground">
+              {language === 'hi' ? 'कैलेंडर' : 'Calendar'}
+            </span>
+          </button>
         </div>
       </main>
 
       {/* CTA Button */}
-      <footer className="p-6">
+      <footer className="p-6 pt-2">
         <Button 
           onClick={onGetStarted}
           className="w-full h-14 text-lg font-semibold rounded-xl shadow-lg"
