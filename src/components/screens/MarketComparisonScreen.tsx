@@ -3,8 +3,9 @@ import { LanguageToggle } from '@/components/LanguageToggle';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ChevronLeft, TrendingUp, TrendingDown, Minus, MapPin, Star, Lightbulb, ChevronRight, Settings } from 'lucide-react';
+import { ChevronLeft, TrendingUp, TrendingDown, Minus, MapPin, Star, Lightbulb, ChevronRight, Settings, Share2 } from 'lucide-react';
 import { Crop, District, getMandiPricesForCrop, getDecisionInsight, MandiPrice, Mandi } from '@/data/mockData';
+import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
 interface MarketComparisonScreenProps {
@@ -27,6 +28,30 @@ export function MarketComparisonScreen({
   const { t, language } = useLanguage();
   const mandiPrices = getMandiPricesForCrop(crop.id);
   const insight = getDecisionInsight(crop.id);
+
+  const shareOnWhatsApp = () => {
+    const cropName = language === 'hi' ? t(crop.nameKey) : crop.nameKey;
+    const districtName = language === 'hi' ? district.nameHi : district.name;
+    
+    let message = language === 'hi' 
+      ? `🌾 *${cropName} के आज के भाव*\n📍 ${districtName}, मध्य प्रदेश\n\n`
+      : `🌾 *Today's ${cropName} Prices*\n📍 ${districtName}, Madhya Pradesh\n\n`;
+
+    mandiPrices.slice(0, 3).forEach((mp, index) => {
+      const mandiName = language === 'hi' ? mp.mandi.nameHi : mp.mandi.name;
+      const trendEmoji = mp.trend === 'rising' ? '📈' : mp.trend === 'falling' ? '📉' : '➡️';
+      message += `${index + 1}. *${mandiName}*\n   ₹${mp.price.toLocaleString()}/क्विंटल ${trendEmoji}\n\n`;
+    });
+
+    message += language === 'hi' 
+      ? `\n_मंडी मित्र ऐप से भेजा गया_`
+      : `\n_Sent via Mandi Mitra app_`;
+
+    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
+    
+    toast.success(language === 'hi' ? 'WhatsApp खुल रहा है...' : 'Opening WhatsApp...');
+  };
 
   const getTrendIcon = (trend: 'rising' | 'stable' | 'falling') => {
     switch (trend) {
@@ -72,9 +97,14 @@ export function MarketComparisonScreen({
             {language === 'hi' ? district.nameHi : district.name}
           </span>
         </div>
-        <button onClick={onSettings} className="p-2 -mr-2 touch-friendly">
-          <Settings className="w-5 h-5 text-muted-foreground" />
-        </button>
+        <div className="flex items-center gap-1">
+          <button onClick={shareOnWhatsApp} className="p-2 touch-friendly text-primary">
+            <Share2 className="w-5 h-5" />
+          </button>
+          <button onClick={onSettings} className="p-2 -mr-2 touch-friendly">
+            <Settings className="w-5 h-5 text-muted-foreground" />
+          </button>
+        </div>
       </header>
 
       <main className="flex-1 p-4 pb-6 overflow-auto space-y-4">
